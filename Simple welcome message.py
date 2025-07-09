@@ -1,10 +1,4 @@
-# Simple welcome message
-print("Welcome to the Student Grade Management System!\n")
-
-#  creates an empty list where all student information will be saved (name, marks, grade,)
-student_list = []
-
-# Function to find the grade based on average marks
+# Function to determine grade based on average marks
 def get_grade(avg):
     if avg >= 90:
         return "A"
@@ -17,103 +11,107 @@ def get_grade(avg):
     else:
         return "F"
 
-# Function to make sure entered marks are between 0 and 100
+#  Function to make sure entered marks are between 0 and 100
 def is_valid_marks(marks):
+    # Check that each mark is within the valid range
     return all(0 <= m <= 100 for m in marks)
 
-# Function to add a new student
-def add_student(name, marks):
-    if not is_valid_marks(marks):
-        print("Marks must be between 0 and 100.")
-        return False
+# Function to calculate the average score from a list of marks
+def calculate_average(marks):
+    return sum(marks) / len(marks)
 
-    try:
-        avg = sum(marks) / len(marks)
-        grade = get_grade(avg)
-        student = {
-            "name": name,
-            "marks": marks,
-            "average": avg,
-            "grade": grade
-        }
-        student_list.append(student)
-        return True
-    except Exception as e:
-        print("Error while adding student:", e)
-        return False
+# Function to create a dictionary representing a student
+def create_student(name, marks):
+    #Calculate average and grade based on marks
+    avg = calculate_average(marks)
+    grade = get_grade(avg)
+    # Return storing all student info
+    return {
+        "name": name,
+        "marks": marks,
+        "average": avg,
+        "grade": grade
+    }
 
-# Function to show stats about the whole class
-def show_statistics():
+# Function to find a student in the list by name 
+def find_student(student_list, name):
+    return next((s for s in student_list if s['name'].lower() == name.lower()), None)
+
+# Function to display overall statistics for the class
+def show_statistics(student_list):
+      # If list is empty, exit 
     if not student_list:
         print("No student data to show.")
         return
-
-    print("\n Class Stats")
+    print("\nClass Stats")
+    # Collect all average scores into a list
     all_averages = [s['average'] for s in student_list]
+     # Calculate and print class average
     print(f"Class Average: {sum(all_averages) / len(all_averages):.2f}")
+    # Print highest and lowest averages in the class
     print(f"Highest Average: {max(all_averages):.2f}")
     print(f"Lowest Average: {min(all_averages):.2f}")
-
-    # Count how many students got each grade
+    
+# Count how many students received each grade
     grades = [s['grade'] for s in student_list]
     print("Grade Distribution:")
     for g in ['A', 'B', 'C', 'D', 'F']:
         count = grades.count(g)
         if count > 0:
-            print(f"  {g}: {count} student(s)")
+            print(f"   {g}: {count} student(s)")
 
-# Function to search for a student by name
-def find_student_by_name(name):
-    for s in student_list:
-        if s['name'].lower() == name.lower():
-            return s
-    return None
-
-# Add student through input
-def input_add_student():
-    name = input("Enter student name: ").strip()
-    if not name:
-        print("Name can't be empty.")
-        return
-
-    try:
-        marks_input = input("Enter 3 marks (space-separated): ")
-        marks = list(map(int, marks_input.split()))
-
-        if len(marks) != 3:
-            print("Please enter exactly 3 marks.")
-            return
-
-        if add_student(name, marks):
-            print(f"{name} was added successfully.")
-    except ValueError:
-        print("Invalid input. Please use only numbers for marks.")
-
-# Show all students
-def show_all_students():
+# Function to display all student records
+def show_all_students(student_list):
     if not student_list:
         print("No student records yet.")
         return
-
-    print("\n All Student Records")
+    print("\nAll Student Records")
+      # Loop through each student and display their info
     for idx, s in enumerate(student_list, start=1):
         print(f"{idx}. Name: {s['name']}")
         print(f"   Marks: {s['marks']}")
         print(f"   Average: {s['average']:.2f}")
         print(f"   Grade: {s['grade']}")
-        print("   " + "-" * 25)
+        print("    " + "-" * 25)
 
-# Search student by name
-def search_student():
+# Function to add a new student based on user input
+def input_add_student(student_list):
+    # Ask for student's name
+    name = input("Enter student name: ").strip()
+    if not name:
+        print("Name can't be empty.")
+        return
+    try:
+         # Ask for 3 space-separated marks and convert to integers
+        marks_input = input("Enter 3 marks (space-separated): ").strip()
+        marks = list(map(int, marks_input.split()))
+        # Ensure exactly 3 numbers were entered
+        if len(marks) != 3:
+            print("Please enter exactly 3 marks.")
+            return
+        # Validate marks are in range 0–100
+        if not is_valid_marks(marks):
+            print("Marks must be between 0 and 100.")
+            return
+        # Create and add student record to the list
+        student = create_student(name, marks)
+        student_list.append(student)
+        print(f"{name} was added successfully.")
+    except ValueError:
+        print("Invalid input. Please use only numbers for marks.")
+
+# Function to search and display a student's record
+def search_student(student_list):
     if not student_list:
         print("No student records yet.")
         return
-
+     # Get name to search
     name = input("Enter name to search: ").strip()
-    found = find_student_by_name(name)
-
+    # Try to find student in the list
+    found = find_student(student_list, name)
+    # If student found, display info
     if found:
-        print("\n Student Found:")
+        print("\nStudent Found:")
         print(f"Name: {found['name']}")
         print(f"Marks: {found['marks']}")
         print(f"Average: {found['average']:.2f}")
@@ -121,8 +119,9 @@ def search_student():
     else:
         print("Student not found.")
 
-# 
-def load_sample_students():
+# Function to load sample students testing
+def load_sample_students(student_list):
+     # Predefined sample students (name + 3 marks each) 
     sample_data = [
         ("Z", [88, 92, 81]),
         ("V", [95, 87, 91]),
@@ -131,49 +130,51 @@ def load_sample_students():
         ("S", [45, 52, 49])
     ]
     print("Adding sample data...")
+    # Add each sample student to the list
     for name, marks in sample_data:
-        add_student(name, marks)
+        student = create_student(name, marks)
+        student_list.append(student)
     print("Sample students added.\n")
 
-# Show example student outputs
-def show_example_outputs():
-    print("\nShowing example student data...")
-    show_all_students()
-    show_statistics()
-
-# Main menu to navigate the system
+# Main function to run the menu-driven Student Grade Management System
 def main():
-    print("Do you want to load sample student data? (yes/no)")
-    if input(">> ").lower() in ['yes', 'y']:
-        load_sample_students()
+    print("Welcome to the Student Grade Management System!\n")
+    
+    # Initialize student list
+    student_list = []
 
+    # Ask if the user wants to preload sample data
+    print("Do you want to load sample student data? (yes/no)")
+    if input(">> ").strip().lower() in ['yes', 'y']:
+        load_sample_students(student_list)
+
+    # Menu loop- runs until user chooses to exit
     while True:
         print("\n===== MAIN MENU =====")
         print("1. Add Student")
         print("2. View All Students")
         print("3. Search for Student")
         print("4. View Statistics")
-        print("5. Show Example Output")
-        print("6. Exit")
-        
-        choice = input("Choose an option (1-6): ")
+        print("5. Exit")
 
+        # Get menu choice
+        choice = input("Choose an option (1-5): ").strip()
+
+        # Match input with actions
         if choice == "1":
-            input_add_student()
+            input_add_student(student_list)
         elif choice == "2":
-            show_all_students()
+            show_all_students(student_list)
         elif choice == "3":
-            search_student()
+            search_student(student_list)
         elif choice == "4":
-            show_statistics()
+            show_statistics(student_list)
         elif choice == "5":
-            show_example_outputs()
-        elif choice == "6":
             print("Thanks for using the Student Grade System.")
             break
         else:
             print("Invalid option. Please try again.")
 
-# Run the app
-if __name__ == "__main__":                                                              
+# Run the main function when the script is executed
+if __name__ == "__main__":
     main()
